@@ -163,7 +163,55 @@ private:
     LogFormatter::ptr m_formatter;
 };
 
+class Logger : public std::enable_shared_from_this<Logger>{
+friend class LoggerManager;
+public:
+    typedef std::shared_ptr<Logger> ptr;
+    typedef Spinlock MutexType;
 
+    Logger(const std::string& name = "root");
+
+    void log(LogLevel::Level level, LogEvent::ptr event);
+
+    void debug(LogEvent::ptr event);
+    void info(LogEvent::ptr event);
+    void warn(LogEvent::ptr event);
+    void error(LogEvent::ptr event);
+    void fatal(LogEvent::ptr event);
+
+    void addAppender(LogAppender::ptr appender);
+
+    void delAppender(LogAppender::ptr appender);
+
+    void clearAppenders();
+
+    LogLevel::Level getLevel() const{ return m_level;}
+
+    void setLevel(LogLevel::Level val){ m_level = val;}
+
+    const std::string& getName() const{ return m_name;}
+
+    void setFormatter(LogFormatter::ptr val);
+
+    void setFormatter(const std::string& val);
+
+    LogFormatter::ptr getFormatter();
+
+    std::string toYamlString();
+private:
+    // 日志名称
+    std::string m_name;
+    // 日志级别
+    LogLevel::Level m_level;
+    // mutex
+    MutexType m_mutex;
+    // 日志目标集合
+    std::list<LogAppender::ptr> m_appenders;
+    // 日志格式器
+    LogFormatter::ptr m_formatter;
+    // 主日志器
+    Logger::ptr m_root;
+};
 
 } //namespace cRPC
 
